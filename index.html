@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Speed Test</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      max-width: 700px;
+      width: 100%;
+    }
+    h1 {
+      font-size: 2.5em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+    #quote {
+      font-size: 1.4em;
+      margin-bottom: 25px;
+      color: #444;
+      line-height: 1.6;
+      padding: 15px;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    #input {
+      width: 100%;
+      height: 120px;
+      padding: 15px;
+      font-size: 1.1em;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      resize: none;
+      transition: border-color 0.3s ease;
+    }
+    #input:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+    #results {
+      font-size: 1.2em;
+      color: #555;
+      margin-bottom: 20px;
+    }
+    .correct {
+      color: #28a745;
+    }
+    .incorrect {
+      color: #dc3545;
+      text-decoration: underline;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 1em;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #timer {
+      font-size: 1.1em;
+      color: #666;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Typing Speed Test</h1>
+    <div id="quote"></div>
+    <textarea id="input" placeholder="Start typing here..."></textarea>
+    <div id="results">Time: 0s | Speed: 0 WPM | Accuracy: 0%</div>
+    <div class="buttons">
+      <button id="newPhrase">New Phrase</button>
+      <button id="reset">Reset Test</button>
+    </div>
+    <div id="timer">Timer: 0s</div>
+  </div>
+
+  <script>
+    const quoteElement = document.getElementById('quote');
+    const inputElement = document.getElementById('input');
+    const resultsElement = document.getElementById('results');
+    const timerElement = document.getElementById('timer');
+    const newPhraseButton = document.getElementById('newPhrase');
+    const resetButton = document.getElementById('reset');
+
+    let startTime, endTime, timerInterval;
+
+    // List of random words
+    const words = [
+      "the", "quick", "brown", "fox", "jumps", "over", "lazy", "dog", "programming", "is",
+      "fun", "and", "challenging", "at", "the", "same", "time", "practice", "makes", "perfect",
+      "especially", "in", "typing", "JavaScript", "is", "the", "language", "of", "the", "web",
+      "keep", "calm", "and", "code", "on", "innovation", "distinguishes", "between", "a", "leader",
+      "and", "a", "follower", "the", "only", "way", "to", "do", "great", "work", "is", "to", "love",
+      "what", "you", "do", "simplicity", "is", "the", "soul", "of", "efficiency", "technology",
+      "is", "best", "when", "it", "brings", "people", "together", "apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon",
+"mango", "nectarine", "orange", "papaya", "quince", "raspberry", "strawberry", "tangerine", "ugli", "vanilla",
+"watermelon", "xylophone", "yam", "zucchini", "airplane", "bicycle", "car", "dolphin", "elephant", "flamingo",
+"giraffe", "helicopter", "iguana", "jaguar", "kangaroo", "lion", "monkey", "narwhal", "octopus", "penguin",
+"quail", "rhinoceros", "seahorse", "tiger", "umbrella", "vulture", "whale", "xylophone", "yak", "zebra",
+"astronomy", "biology", "chemistry", "physics", "geography", "history", "mathematics", "literature", "philosophy", "psychology",
+"architecture", "engineering", "medicine", "technology", "art", "music", "dance", "theater", "cinema", "photography",
+"basketball", "football", "soccer", "tennis", "volleyball", "baseball", "hockey", "golf", "swimming", "running",
+"cycling", "yoga", "pilates", "meditation", "hiking", "camping", "fishing", "gardening", "cooking", "baking",
+"painting", "drawing", "sculpting", "writing", "reading", "traveling", "exploring", "learning", "discovering", "creating"
+    ];
+
+    // Function to generate a random phrase of 20 words
+    function generateRandomPhrase() {
+      let phrase = [];
+      for (let i = 0; i < 20; i++) {
+        phrase.push(words[Math.floor(Math.random() * words.length)]);
+      }
+      return phrase.join(' ');
+    }
+
+    // Function to start the test
+    function startTest() {
+      const randomPhrase = generateRandomPhrase();
+      quoteElement.innerText = randomPhrase;
+      inputElement.value = '';
+      resultsElement.innerText = 'Time: 0s | Speed: 0 WPM | Accuracy: 0%';
+      timerElement.innerText = 'Timer: 0s';
+      startTime = null;
+      endTime = null;
+      clearInterval(timerInterval);
+      quoteElement.innerHTML = randomPhrase; // Reset highlighting
+      inputElement.focus();
+    }
+
+    // Function to start the timer
+    function startTimer() {
+      let seconds = 0;
+      timerInterval = setInterval(() => {
+        seconds++;
+        timerElement.innerText = `Timer: ${seconds}s`;
+      }, 1000);
+    }
+
+    // Initialize the test with a random phrase
+    startTest();
+
+    inputElement.addEventListener('input', () => {
+      if (!startTime) {
+        startTime = new Date();
+        startTimer();
+      }
+
+      const typedText = inputElement.value;
+      const quoteText = quoteElement.innerText;
+      const quoteArray = quoteText.split('');
+      const typedArray = typedText.split('');
+
+      let correctChars = 0;
+      let displayText = '';
+
+      quoteArray.forEach((char, index) => {
+        if (typedArray[index] === char) {
+          correctChars++;
+          displayText += `<span class="correct">${char}</span>`;
+        } else if (typedArray[index]) {
+          displayText += `<span class="incorrect">${char}</span>`;
+        } else {
+          displayText += char;
+        }
+      });
+
+      quoteElement.innerHTML = displayText;
+
+      if (typedText.length === quoteText.length) {
+        endTime = new Date();
+        const timeTaken = (endTime - startTime) / 1000; // in seconds
+        const wordsTyped = typedText.split(' ').length;
+        const wpm = Math.round((wordsTyped / timeTaken) * 60);
+        const accuracy = Math.round((correctChars / quoteText.length) * 100);
+
+        resultsElement.innerText = `Time: ${timeTaken.toFixed(1)}s | Speed: ${wpm} WPM | Accuracy: ${accuracy}%`;
+        clearInterval(timerInterval);
+      }
+    });
+
+    // New Phrase button
+    newPhraseButton.addEventListener('click', () => {
+      startTest();
+    });
+
+    // Reset button
+    resetButton.addEventListener('click', () => {
+      startTest();
+    });
+  </script>
+</body>
+</html>
